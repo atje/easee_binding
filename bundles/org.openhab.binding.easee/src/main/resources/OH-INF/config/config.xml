@@ -1,0 +1,23 @@
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="thing-type:easee:account">
+		<parameter name="username" type="text" required="true">
+			<label>User</label>
+			<description>Enter registered Easee cloud email or phone number</description>
+		</parameter>
+		<parameter name="password" type="text" required="true">
+			<label>Password</label>
+			<description>Easee cloud password</description>
+			<context>password</context>
+		</parameter>
+		<parameter name="pollingInterval" type="integer" required="false" unit="s">
+			<label>Polling interval</label>
+			<description>Set Easee cloud polling intervall, in seconds</description>
+			<default>60</default>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>
