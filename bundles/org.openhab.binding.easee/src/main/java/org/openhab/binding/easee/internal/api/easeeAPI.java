@@ -33,7 +33,6 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.easee.internal.dto.chargerDTO;
 import org.openhab.binding.easee.internal.dto.chargerStateDTO;
-import org.openhab.binding.easee.internal.dto.chargersDTO;
 import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
@@ -45,7 +44,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * The {@link easeeAPI} handles all Easee Cloud communication, including automatic refresh of authentication 
+ * The {@link easeeAPI} handles all Easee Cloud communication, including automatic refresh of authentication
  * security token.
  *
  * @author Andreas Tjernsten - Initial contribution
@@ -67,12 +66,14 @@ public class easeeAPI implements AccessTokenRefreshListener {
      * Create {@link easeeAPI} instance
      * 
      * @param httpClient HttpClient to use for could access
-     * @param oAuthFactory OAuthFactory for creation of OAuthClientService (this is done when {@link authenticateUser} is called)
+     * @param oAuthFactory OAuthFactory for creation of OAuthClientService (this is done when {@link authenticateUser}
+     *            is called)
      * @param uniqueID unique ID for this instance
      * @param username Easee cloud username
      * @param password Easee cloud password
      */
-    public easeeAPI(HttpClient httpClient, OAuthFactory oAuthFactory, String uniqueID, String username, String password) {
+    public easeeAPI(HttpClient httpClient, OAuthFactory oAuthFactory, String uniqueID, String username,
+            String password) {
         this.httpClient = httpClient;
         this.oAuthFactory = oAuthFactory;
         this.uniqueID = uniqueID;
@@ -86,15 +87,15 @@ public class easeeAPI implements AccessTokenRefreshListener {
     }
 
     /**
-     * {@link authenticateUser} authenticates user towards Easee cloud using credentials provided upon easeeAPI instance creation. 
-     * Also creates a OAuthClientService for handling authentication token refresh. 
+     * {@link authenticateUser} authenticates user towards Easee cloud using credentials provided upon easeeAPI instance
+     * creation.
+     * Also creates a OAuthClientService for handling authentication token refresh.
      * Throws an exception if any part of authentication fails.
      * 
      * @throws easeeAuthenticationException
      * @throws easeeCommunicationException
      */
-    public void authenticateUser()
-            throws easeeAuthenticationException, easeeCommunicationException {
+    public void authenticateUser() throws easeeAuthenticationException, easeeCommunicationException {
         try {
             logger.debug("Authenticating Easee cloud user '{}' using provided password", username);
 
@@ -142,18 +143,19 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
     /**
      * {@link getChargers} Retrieves chargers from Easee cloud
+     * 
      * @return List<chargerDTO>
      * @throws easeeCommunicationException if JSON reponse cannot be converted to chargerDTO object
-      */
+     */
     public List<chargerDTO> getChargers() {
         List<chargerDTO> chargers = null;
 
         logger.debug("Retrieving chargers from Easee cloud");
-        
+
         try {
             AccessTokenResponse accessTokenResponse = getAndCheckAccessTokenResponse();
             if (accessTokenResponse == null) {
-                return new ArrayList<chargerDTO>();                   
+                return new ArrayList<chargerDTO>();
             }
 
             Request request = httpClient.newRequest(GET_CHARGERS_URL).method(HttpMethod.GET)
@@ -162,10 +164,11 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
             ContentResponse response = getCheckedResponse(request);
             if (response == null) {
-                 return new ArrayList<chargerDTO>();
+                return new ArrayList<chargerDTO>();
             }
 
-            Type chargerListType = new TypeToken<ArrayList<chargerDTO>>(){}.getType();
+            Type chargerListType = new TypeToken<ArrayList<chargerDTO>>() {
+            }.getType();
             chargers = gson.fromJson(response.getContentAsString(), chargerListType);
 
             if (chargers == null) {
@@ -183,7 +186,7 @@ public class easeeAPI implements AccessTokenRefreshListener {
      * 
      * @param chargerId the charger ID to fetch state from
      * @return chargerStateDTO state object or null if there was an error
-     * @throws easeeCommunicationException 
+     * @throws easeeCommunicationException
      */
     @Nullable
     public chargerStateDTO getChargerState(String chargerId) {
@@ -191,10 +194,10 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
         logger.debug("Retrieving charger state from Easee cloud");
 
-         try {
+        try {
             AccessTokenResponse accessTokenResponse = getAndCheckAccessTokenResponse();
             if (accessTokenResponse == null) {
-               return null;                   
+                return null;
             }
 
             final String URL = GET_CHARGERS_URL + "/" + chargerId + "/state";
@@ -204,7 +207,7 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
             ContentResponse response = getCheckedResponse(request);
             if (response == null) {
-                    return null;
+                return null;
             }
 
             chargerState = gson.fromJson(response.getContentAsString(), chargerStateDTO.class);
@@ -221,6 +224,7 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
     /**
      * {@link getCheckedResponse} makes request towards cloud API and checks that the response was ok
+     * 
      * @param request to be made
      * @return response from server, or null if there was a problem with the request
      */
@@ -250,28 +254,29 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
         }
     }
-    
+
     /**
      * {@link getAndCheckAccessTokenResponse} gets AccessTokenResponse from oAuthService, or null if there was a problem
+     * 
      * @return AccessTokenResponse
      */
     @Nullable
     private AccessTokenResponse getAndCheckAccessTokenResponse() {
         AccessTokenResponse accessTokenResponse = null;
-        
+
         try {
             OAuthClientService oAuthService = this.oAuthService;
 
             if (oAuthService == null) {
                 logger.error("No oAuthService for Easee account, null");
-                return null;                   
+                return null;
             }
 
             accessTokenResponse = oAuthService.getAccessTokenResponse();
 
             if (accessTokenResponse == null) {
                 logger.error("Failed to retrieve accessToken from OAuthService for Easee account, null");
-                return null;                   
+                return null;
             }
 
             return accessTokenResponse;
@@ -283,7 +288,7 @@ public class easeeAPI implements AccessTokenRefreshListener {
     }
 
     public void close() {
-         if (oAuthService != null) {
+        if (oAuthService != null) {
             oAuthService.close();
         }
     }

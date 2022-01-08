@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.easee.internal.api;
 
-import java.util.HashMap;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**

@@ -12,12 +12,8 @@
  */
 package org.openhab.binding.easee.internal.dto;
 
-import java.time.LocalDateTime;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-
-import org.openhab.binding.easee.internal.dto.chargerStateDTO;
 
 /**
  * The {@link chargerDTO} holds internal data for a Easee Charger.
@@ -33,7 +29,7 @@ public class chargerDTO {
     public @Nullable String updatedOn;
     public @Nullable String backPlate;
     public @Nullable String levelOfAccess;
-    public @Nullable String productCode; 
+    public @Nullable String productCode;
 
     public chargerDTO(String id, String name) {
         this.id = id;

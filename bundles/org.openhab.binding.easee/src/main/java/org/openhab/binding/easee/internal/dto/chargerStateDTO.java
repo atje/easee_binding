@@ -70,11 +70,10 @@ public class chargerStateDTO {
     public Integer offlineMaxCircuitCurrentP3;
     public Integer errorCode;
     public Integer fatalErrorCode;
-//     * "errors;
+    // * "errors;
     public double eqAvailableCurrentP1;
     public double eqAvailableCurrentP2;
     public double eqAvailableCurrentP3;
     public double deratedCurrent;
     public boolean deratingActive;
-    
 }

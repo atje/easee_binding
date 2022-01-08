@@ -46,21 +46,21 @@ public class easeeBindingConstants {
         public static final String ENERGY_PER_HOUR = "energyperhour";
         public static final String SESSION_ENERGY = "sessionenergy";
         public static final String LIFETIME_ENERGY = "lifetimeenergy";
-        
+
         public static final String PHASE1_CURRENT = "phase1current";
         public static final String PHASE2_CURRENT = "phase2current";
         public static final String PHASE3_CURRENT = "phase3current";
         public static final String PHASE1_VOLTAGE = "phase1voltage";
         public static final String PHASE2_VOLTAGE = "phase2voltage";
         public static final String PHASE3_VOLTAGE = "phase3voltage";
-        public static final String NEW_FIRMWARE_AVAIL = "newfirwareavailable";    
+        public static final String NEW_FIRMWARE_AVAIL = "newfirwareavailable";
     }
-    
+
     // Charger configuration parameters
     public static final class Parameters {
         private Parameters() {
         }
 
-        //public static final String "";
+        // public static final String "";
     }
 }

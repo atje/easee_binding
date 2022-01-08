@@ -48,8 +48,8 @@ public class easeeDiscoveryService extends AbstractDiscoveryService implements T
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private @Nullable ScheduledFuture<?> discoveryScheduler;
-    
-    @Nullable 
+
+    @Nullable
     private easeeAccountHandler accountHandler;
 
     public easeeDiscoveryService() {
@@ -65,28 +65,27 @@ public class easeeDiscoveryService extends AbstractDiscoveryService implements T
             return accountHandler.getThing().getUID();
         }
     }
-    
+
     @Override
     public void startScan() {
-        //        easeeAccountHandler accountHandler = this.accountHandler;
+        // easeeAccountHandler accountHandler = this.accountHandler;
         logger.debug("Starting scan for new chargers");
         if (accountHandler != null) {
             List<chargerDTO> chargers = accountHandler.getChargers();
             if (chargers != null) {
                 chargers.forEach(charger -> {
                     logger.debug("Found charger {} during scan, adding to thingDiscovered", charger.id);
-                        ThingUID thingUID = new ThingUID(THING_TYPE_CHARGER,
-                        accountHandler.getThing().getUID(), charger.id);
-                        DiscoveryResult result = DiscoveryResultBuilder.create(thingUID).withLabel(charger.name)
-                                .withBridge(accountHandler.getThing().getUID()).build();
-                        thingDiscovered(result);
+                    ThingUID thingUID = new ThingUID(THING_TYPE_CHARGER, accountHandler.getThing().getUID(),
+                            charger.id);
+                    DiscoveryResult result = DiscoveryResultBuilder.create(thingUID).withLabel(charger.name)
+                            .withBridge(accountHandler.getThing().getUID()).build();
+                    thingDiscovered(result);
                 });
             } else {
                 logger.debug("No chargers found when scanning");
             }
         }
     }
-
 
     @Override
     public void startBackgroundDiscovery() {
@@ -97,7 +96,8 @@ public class easeeDiscoveryService extends AbstractDiscoveryService implements T
             this.discoveryScheduler = null;
         }
 
-        discoveryScheduler = scheduler.scheduleWithFixedDelay(this::startScan, 0, DISCOVERY_INTERVAL_MINUTES, TimeUnit.MINUTES);
+        discoveryScheduler = scheduler.scheduleWithFixedDelay(this::startScan, 0, DISCOVERY_INTERVAL_MINUTES,
+                TimeUnit.MINUTES);
     }
 
     @Override
@@ -117,22 +117,19 @@ public class easeeDiscoveryService extends AbstractDiscoveryService implements T
         }
     }
 
-
     @Override
     public void activate() {
         super.activate(null);
     }
 
-    
     @Override
     public void deactivate() {
         stopBackgroundDiscovery();
         removeOlderResults(System.currentTimeMillis(), getBridgeUid());
     }
 
-
     @Override
     public @Nullable ThingHandler getThingHandler() {
-       return accountHandler;
+        return accountHandler;
     }
 }

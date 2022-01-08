@@ -23,15 +23,15 @@
 			<channel id="energyperhour" typeId="energyperhour"/>
 			<channel id="sessionenergy" typeId="sessionenergy"/>
 			<channel id="lifetimeenergy" typeId="lifetimeenergy"/>
-        	<channel id="phase1current" typeId="p1current" />
-        	<channel id="phase2current" typeId="p2current" />
-        	<channel id="phase3current" typeId="p3current" />
-        	<channel id="phase1voltage" typeId="p1voltage" />
-        	<channel id="phase2voltage" typeId="p2voltage" />
-        	<channel id="phase3voltage" typeId="p3voltage" />
-			<channel id="newfirwareavailable" typeId="newfirwareavailable" />
+			<channel id="phase1current" typeId="p1current"/>
+			<channel id="phase2current" typeId="p2current"/>
+			<channel id="phase3current" typeId="p3current"/>
+			<channel id="phase1voltage" typeId="p1voltage"/>
+			<channel id="phase2voltage" typeId="p2voltage"/>
+			<channel id="phase3voltage" typeId="p3voltage"/>
+			<channel id="newfirwareavailable" typeId="newfirwareavailable"/>
 
-    	</channels>
+		</channels>
 		<representation-property>createdOn</representation-property>
 		<config-description-ref uri="thing-type:easee:charger"/>
 	</thing-type>
@@ -120,7 +120,8 @@
 	<channel-type id="newfirwareavailable">
 		<item-type>Switch</item-type>
 		<label>New firmware available</label>
-		<description>New firmware for the charger is available if ON, otherwise OFF if firmware version is the latest available</description>
+		<description>New firmware for the charger is available if ON, otherwise OFF if firmware version is the latest
+			available</description>
 		<state readOnly="true"></state>
 	</channel-type>
 

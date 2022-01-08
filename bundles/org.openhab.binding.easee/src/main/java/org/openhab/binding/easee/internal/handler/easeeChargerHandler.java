@@ -19,22 +19,19 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.HttpClient;
 import org.openhab.binding.easee.internal.api.easeeAPI;
-import org.openhab.binding.easee.internal.dto.chargerDTO;
 import org.openhab.binding.easee.internal.dto.chargerStateDTO;
-import org.openhab.core.library.types.StringType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +45,7 @@ public class easeeChargerHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(easeeChargerHandler.class);
 
     private @Nullable chargerStateDTO chargerState;
-    private @Nullable easeeAPI api; 
+    private @Nullable easeeAPI api;
 
     public easeeChargerHandler(Thing thing) {
         super(thing);
@@ -61,7 +58,8 @@ public class easeeChargerHandler extends BaseThingHandler {
             easeeAccountHandler account = (easeeAccountHandler) bridgeHandler;
             if (account == null) {
                 logger.error("No Easee API while initiatizing ChargerThing, null");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.HANDLER_INITIALIZING_ERROR, "No Easee account while initiatizing ChargerThing, null");
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.HANDLER_INITIALIZING_ERROR,
+                        "No Easee account while initiatizing ChargerThing, null");
                 return;
             }
             api = account.getAPI();
@@ -85,11 +83,13 @@ public class easeeChargerHandler extends BaseThingHandler {
         }
     }
 
-/**
- * {@link updateChargerFromCloud} updates charger Thing channels and configuration properties based on cloud state information
- *  Changes the charger Thing to OFFLINE if there was a problem getting state information or if the charger is disabled (through native app or otherwise)
- * 
- */
+    /**
+     * {@link updateChargerFromCloud} updates charger Thing channels and configuration properties based on cloud state
+     * information
+     * Changes the charger Thing to OFFLINE if there was a problem getting state information or if the charger is
+     * disabled (through native app or otherwise)
+     * 
+     */
     public void updateChargerFromCloud() {
         try {
             String id = getThing().getUID().getId();
@@ -97,8 +97,7 @@ public class easeeChargerHandler extends BaseThingHandler {
             logger.debug("Updating channels for charger {}", id);
             chargerState = api.getChargerState(id);
             if (chargerState == null) {
-                logger.debug(
-                        "Failed to update state from API, Charger {} changed to OFFLINE. Will try again later", 
+                logger.debug("Failed to update state from API, Charger {} changed to OFFLINE. Will try again later",
                         id);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                         "Failed to update state from API. Will try again later");
@@ -111,7 +110,7 @@ public class easeeChargerHandler extends BaseThingHandler {
                         "Cloud reporting charger " + id + " offline");
                 return;
             }
-            
+
             // Put charger back online is it has been offline
             if (getThing().getStatus().equals(ThingStatus.OFFLINE)) {
                 updateStatus(ThingStatus.ONLINE);
@@ -132,7 +131,7 @@ public class easeeChargerHandler extends BaseThingHandler {
                 case 2:
                     updateState(STATE_ID, new StringType("connected"));
                     break;
-               case 3:
+                case 3:
                     updateState(STATE_ID, new StringType("charging"));
                     break;
                 case 4:
@@ -151,12 +150,13 @@ public class easeeChargerHandler extends BaseThingHandler {
             updateState(PHASE1_CURRENT, new DecimalType(chargerState.inCurrentT3));
             updateState(PHASE2_CURRENT, new DecimalType(chargerState.inCurrentT4));
             updateState(PHASE3_CURRENT, new DecimalType(chargerState.inCurrentT5));
-            
+
             updateState(PHASE1_VOLTAGE, new DecimalType(chargerState.inVoltageT2T3));
             updateState(PHASE2_VOLTAGE, new DecimalType(chargerState.inVoltageT2T4));
             updateState(PHASE3_VOLTAGE, new DecimalType(chargerState.inVoltageT2T5));
 
-            updateState(NEW_FIRMWARE_AVAIL, (chargerState.latestFirmware.equals(chargerState.chargerFirmware)) ? OnOffType.OFF : OnOffType.ON);
+            updateState(NEW_FIRMWARE_AVAIL,
+                    (chargerState.latestFirmware.equals(chargerState.chargerFirmware)) ? OnOffType.OFF : OnOffType.ON);
 
         } catch (Exception e) {
             logger.error("Caught exception, message '{}'", e.getMessage());

@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import javax.validation.OverridesAttribute;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
@@ -31,14 +29,12 @@ import org.openhab.binding.easee.internal.api.easeeAPI;
 import org.openhab.binding.easee.internal.dto.chargerDTO;
 import org.openhab.binding.easee.internal.easeeAccountConfiguration;
 import org.openhab.binding.easee.internal.easeeDiscoveryService;
-import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthFactory;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
-import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.binding.BaseBridgeHandler;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerService;
@@ -50,7 +46,8 @@ import com.google.gson.Gson;
 
 /**
  * The {@link easeeAccountHandler} implements a bridge towards Easee cloud, representing a registered account.
- * When active, it will trigger updates of all defined charger Things with an intervall defined by the configuration parameter pollingInterval 
+ * When active, it will trigger updates of all defined charger Things with an intervall defined by the configuration
+ * parameter pollingInterval
  *
  * @author Andreas Tjernsten - Initial contribution, based heavily on MyQ binding
  */
@@ -100,7 +97,7 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
             chargers = api.getChargers();
             logger.info("Got {} chargers from cloud service (enable TRACE level to see full list)", chargers.size());
             logger.trace("chargers: {}", chargers.toString());
-            
+
             startPoll();
 
         } catch (Exception e) {
@@ -124,14 +121,13 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
     @Override
     public Collection<Class<? extends ThingHandlerService>> getServices() {
         return Collections.singleton(easeeDiscoveryService.class);
-    
     }
-    
+
     @Nullable
     public easeeAPI getAPI() {
         return api;
     }
-    
+
     private synchronized void startPoll() {
         if (pollFuture != null) {
             logger.debug("Polling restarted");
@@ -156,7 +152,5 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
                 ((easeeChargerHandler) handler).updateChargerFromCloud();
             }
         }
-
     }
-
 }
