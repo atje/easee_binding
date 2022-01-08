@@ -28,13 +28,39 @@ public class easeeBindingConstants {
 
     private static final String BINDING_ID = "easee";
 
+    public static final String VENDOR_EASEE = "Easee";
+
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_ACCOUNT = new ThingTypeUID(BINDING_ID, "account");
-    // public static final ThingTypeUID THING_TYPE_CHARGER = new ThingTypeUID(BINDING_ID, "charger");
-    // public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_ACCOUNT,
-    // THING_TYPE_CHARGER);
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_ACCOUNT);
+    public static final ThingTypeUID THING_TYPE_CHARGER = new ThingTypeUID(BINDING_ID, "charger");
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_ACCOUNT, THING_TYPE_CHARGER);
+    public static final Set<ThingTypeUID> SUPPORTED_DISCOVERY_THING_TYPES_UIDS = Set.of(THING_TYPE_CHARGER);
 
-    // List of all Channel ids
-    // public static final String CHANNEL_1 = "channel1";
+    // Charger channels
+    public static final class Channels {
+        private Channels() {
+        }
+
+        public static final String STATE_ID = "state";
+        public static final String TOTAL_POWER_ID = "totalpower";
+        public static final String ENERGY_PER_HOUR = "energyperhour";
+        public static final String SESSION_ENERGY = "sessionenergy";
+        public static final String LIFETIME_ENERGY = "lifetimeenergy";
+        
+        public static final String PHASE1_CURRENT = "phase1current";
+        public static final String PHASE2_CURRENT = "phase2current";
+        public static final String PHASE3_CURRENT = "phase3current";
+        public static final String PHASE1_VOLTAGE = "phase1voltage";
+        public static final String PHASE2_VOLTAGE = "phase2voltage";
+        public static final String PHASE3_VOLTAGE = "phase3voltage";
+        public static final String NEW_FIRMWARE_AVAIL = "newfirwareavailable";    
+    }
+    
+    // Charger configuration parameters
+    public static final class Parameters {
+        private Parameters() {
+        }
+
+        //public static final String "";
+    }
 }

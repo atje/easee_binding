@@ -5,9 +5,123 @@
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<bridge-type id="account">
-		<label>Easee Account</label>
-		<description>Easee Cloud Account</description>
+		<label>Easee Cloud</label>
+		<description>Represents the connection to Easee Cloud</description>
+		<category>Webservice</category>
 		<config-description-ref uri="thing-type:easee:account"/>
 	</bridge-type>
+
+	<thing-type id="charger">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="account"/>
+		</supported-bridge-type-refs>
+		<label>Easee charger</label>
+		<description>A smart car charger</description>
+		<channels>
+			<channel id="state" typeId="state"/>
+			<channel id="totalpower" typeId="totalpower"/>
+			<channel id="energyperhour" typeId="energyperhour"/>
+			<channel id="sessionenergy" typeId="sessionenergy"/>
+			<channel id="lifetimeenergy" typeId="lifetimeenergy"/>
+        	<channel id="phase1current" typeId="p1current" />
+        	<channel id="phase2current" typeId="p2current" />
+        	<channel id="phase3current" typeId="p3current" />
+        	<channel id="phase1voltage" typeId="p1voltage" />
+        	<channel id="phase2voltage" typeId="p2voltage" />
+        	<channel id="phase3voltage" typeId="p3voltage" />
+			<channel id="newfirwareavailable" typeId="newfirwareavailable" />
+
+    	</channels>
+		<representation-property>createdOn</representation-property>
+		<config-description-ref uri="thing-type:easee:charger"/>
+	</thing-type>
+
+	<channel-type id="state">
+		<item-type>String</item-type>
+		<label>Charger Status</label>
+		<state readOnly="true">
+			<options>
+				<option value="waiting">Waiting</option>
+				<option value="connected">Connected</option>
+				<option value="charging">Charging</option>
+				<option value="idle">Idle</option>
+				<option value="unknown">Unknown</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="totalpower">
+		<item-type>Number:Power</item-type>
+		<label>Total power</label>
+		<description>TBD</description>
+		<state readOnly="true" pattern="%.1f kW"></state>
+	</channel-type>
+
+	<channel-type id="energyperhour">
+		<item-type>Number:Power</item-type>
+		<label>Energy per hour</label>
+		<state readOnly="true" pattern="%.1f kWh"></state>
+	</channel-type>
+
+	<channel-type id="sessionenergy">
+		<item-type>Number:Power</item-type>
+		<label>Charger session energy</label>
+		<state readOnly="true" pattern="%.2f kWh"></state>
+	</channel-type>
+
+	<channel-type id="lifetimeenergy">
+		<item-type>Number:Power</item-type>
+		<label>Charger lifetime energy</label>
+		<state readOnly="true" pattern="%.2f kWh"></state>
+	</channel-type>
+
+	<channel-type id="p1current">
+		<item-type>Number:ElectricCurrent</item-type>
+		<label>Phase1 Current</label>
+		<description>Instant phase 1 input current consumed by the charger</description>
+		<state readOnly="true" pattern="%.1f A"></state>
+	</channel-type>
+
+	<channel-type id="p2current">
+		<item-type>Number:ElectricCurrent</item-type>
+		<label>Phase2 Current</label>
+		<description>Instant phase 2 input current consumed by the charger</description>
+		<state readOnly="true" pattern="%.1f A"></state>
+	</channel-type>
+
+	<channel-type id="p3current">
+		<item-type>Number:ElectricCurrent</item-type>
+		<label>Phase3 Current</label>
+		<description>Instant phase 3 input current consumed by the charger</description>
+		<state readOnly="true" pattern="%.1f A"></state>
+	</channel-type>
+
+	<channel-type id="p1voltage">
+		<item-type>Number:ElectricPotential</item-type>
+		<label>Phase1 Voltage</label>
+		<description>Instant phase 1 input voltage measured by the charger</description>
+		<state readOnly="true" pattern="%.0f V"></state>
+	</channel-type>
+
+	<channel-type id="p2voltage">
+		<item-type>Number:ElectricPotential</item-type>
+		<label>Phase2 Voltage</label>
+		<description>Instant phase 2 input voltage measured by the charger</description>
+		<state readOnly="true" pattern="%.0f V"></state>
+	</channel-type>
+
+	<channel-type id="p3voltage">
+		<item-type>Number:ElectricPotential</item-type>
+		<label>Phase3 Voltage</label>
+		<description>Instant phase 3 input voltage measured by the charger</description>
+		<state readOnly="true" pattern="%.0f V"></state>
+	</channel-type>
+
+	<channel-type id="newfirwareavailable">
+		<item-type>Switch</item-type>
+		<label>New firmware available</label>
+		<description>New firmware for the charger is available if ON, otherwise OFF if firmware version is the latest available</description>
+		<state readOnly="true"></state>
+	</channel-type>
 
 </thing:thing-descriptions>

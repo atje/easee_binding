@@ -10,18 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.easee.internal;
+package org.openhab.binding.easee.internal.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import java.util.List;
 
 /**
- * The {@link easeeConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link chargersDTO} holds all Easee Chargers.
  *
  * @author Andreas Tjernsten - Initial contribution
  */
-@NonNullByDefault
-public class easeeAccountConfiguration {
-    public String username = "";
-    public String password = "";
-    public Integer pollingInterval = 60;
+public class chargersDTO {
+    public List<chargerDTO> chargers;
 }

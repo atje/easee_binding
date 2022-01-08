@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.openhab.binding.easee.internal.handler.easeeAccountHandler;
+import org.openhab.binding.easee.internal.handler.easeeChargerHandler;
 import org.openhab.core.auth.client.oauth2.OAuthFactory;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.thing.Bridge;
@@ -40,7 +41,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(configurationPid = "binding.easee", service = ThingHandlerFactory.class)
 public class easeeHandlerFactory extends BaseThingHandlerFactory {
     private final HttpClient httpClient;
-    private OAuthFactory oAuthFactory;
+    private final OAuthFactory oAuthFactory;
 
     @Activate
     public easeeHandlerFactory(final @Reference HttpClientFactory httpClientFactory,
@@ -60,6 +61,10 @@ public class easeeHandlerFactory extends BaseThingHandlerFactory {
 
         if (THING_TYPE_ACCOUNT.equals(thingTypeUID)) {
             return new easeeAccountHandler((Bridge) thing, httpClient, oAuthFactory);
+        }
+
+        if (THING_TYPE_CHARGER.equals(thingTypeUID)) {
+            return new easeeChargerHandler(thing);
         }
 
         return null;

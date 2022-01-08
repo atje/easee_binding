@@ -15,9 +15,10 @@
 		</parameter>
 		<parameter name="pollingInterval" type="integer" required="false" unit="s">
 			<label>Polling interval</label>
-			<description>Set Easee cloud polling intervall, in seconds</description>
+			<description>Set Easee cloud polling intervall, in seconds. Defaults to 60 seconds.</description>
 			<default>60</default>
 		</parameter>
 	</config-description>
-
+	<config-description uri="thing-type:easee:charger">
+	</config-description>
 </config-description:config-descriptions>
