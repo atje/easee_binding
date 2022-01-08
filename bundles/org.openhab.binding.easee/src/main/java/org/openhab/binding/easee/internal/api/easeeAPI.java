@@ -143,16 +143,15 @@ public class easeeAPI implements AccessTokenRefreshListener {
     /**
      * {@link getChargers} Retrieves chargers from Easee cloud
      * @return List<chargerDTO>
-     */
+     * @throws easeeCommunicationException if JSON reponse cannot be converted to chargerDTO object
+      */
     public List<chargerDTO> getChargers() {
         List<chargerDTO> chargers = null;
 
         logger.debug("Retrieving chargers from Easee cloud");
         
         try {
-
             AccessTokenResponse accessTokenResponse = getAndCheckAccessTokenResponse();
-
             if (accessTokenResponse == null) {
                 return new ArrayList<chargerDTO>();                   
             }
@@ -161,29 +160,20 @@ public class easeeAPI implements AccessTokenRefreshListener {
                     .header(HttpHeader.ACCEPT, MediaType.APPLICATION_JSON)
                     .header("Authorization", authTokenHeader(accessTokenResponse));
 
-            ContentResponse response = request.send();
-
+            ContentResponse response = getCheckedResponse(request);
             if (response == null) {
-                throw new easeeCommunicationException("null reponse from authentication request");
-            }
-
-            logger.trace("Full content response from get chargers request: {}", response.getContentAsString());
-
-
-            if (response.getStatus() != HttpStatus.OK_200) {
-                logger.warn("Status ({}), Reason '{}'", response.getStatus(), response.getReason());
-                return new ArrayList<chargerDTO>();
+                 return new ArrayList<chargerDTO>();
             }
 
             Type chargerListType = new TypeToken<ArrayList<chargerDTO>>(){}.getType();
             chargers = gson.fromJson(response.getContentAsString(), chargerListType);
 
             if (chargers == null) {
-                throw new easeeCommunicationException("null chargers list when parsing Easee cloud response");
+                throw new easeeCommunicationException("null chargers list when parsing getChargers response");
             }
             return chargers;
         } catch (Exception e) {
-            logger.warn("Failed to retrieve chargers from cloud, exception {}", e.getMessage());
+            logger.warn("Exception in getChargers(): {}", e.getMessage());
             return new ArrayList<chargerDTO>();
         }
     }
@@ -203,7 +193,6 @@ public class easeeAPI implements AccessTokenRefreshListener {
 
          try {
             AccessTokenResponse accessTokenResponse = getAndCheckAccessTokenResponse();
-
             if (accessTokenResponse == null) {
                return null;                   
             }
@@ -213,17 +202,9 @@ public class easeeAPI implements AccessTokenRefreshListener {
                     .header(HttpHeader.ACCEPT, MediaType.APPLICATION_JSON)
                     .header("Authorization", authTokenHeader(accessTokenResponse));
 
-            ContentResponse response = request.send();
-
+            ContentResponse response = getCheckedResponse(request);
             if (response == null) {
-                throw new easeeCommunicationException("null reponse from authentication request");
-            }
-
-            logger.trace("Full content response from get charger state request: {}", response.getContentAsString());
-
-            if (response.getStatus() != HttpStatus.OK_200) {
-                logger.warn("Status ({}), Reason '{}'", response.getStatus(), response.getReason());
-                return null;
+                    return null;
             }
 
             chargerState = gson.fromJson(response.getContentAsString(), chargerStateDTO.class);
@@ -233,7 +214,7 @@ public class easeeAPI implements AccessTokenRefreshListener {
             }
             return chargerState;
         } catch (Exception e) {
-            logger.warn("Failed to retrieve charger state from cloud, exception {}", e.getMessage());
+            logger.warn("Exception in getChargerState: {}", e.getMessage());
             return null;
         }
     }
