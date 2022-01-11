@@ -68,9 +68,9 @@ public class easeeDiscoveryService extends AbstractDiscoveryService implements T
 
     @Override
     public void startScan() {
-        // easeeAccountHandler accountHandler = this.accountHandler;
-        logger.debug("Starting scan for new chargers");
+        easeeAccountHandler accountHandler = this.accountHandler;
         if (accountHandler != null) {
+            logger.debug("Scanning for new chargers");
             List<chargerDTO> chargers = accountHandler.getChargers();
             if (chargers != null) {
                 chargers.forEach(charger -> {

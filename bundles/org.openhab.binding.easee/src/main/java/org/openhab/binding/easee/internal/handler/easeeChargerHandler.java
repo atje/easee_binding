@@ -74,9 +74,11 @@ public class easeeChargerHandler extends BaseThingHandler {
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         try {
-            if (command instanceof RefreshType) {
-                updateChargerFromCloud();
-                return;
+            if (getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                if (command instanceof RefreshType) {
+                    updateChargerFromCloud();
+                    return;
+                }
             }
         } catch (Exception e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
@@ -86,15 +88,28 @@ public class easeeChargerHandler extends BaseThingHandler {
     /**
      * {@link updateChargerFromCloud} updates charger Thing channels and configuration properties based on cloud state
      * information
-     * Changes the charger Thing to OFFLINE if there was a problem getting state information or if the charger is
-     * disabled (through native app or otherwise)
+     * 
+     * Changes the charger Thing to OFFLINE if there was a problem getting state information, or if the charger is
+     * offline (through native app or otherwise)
      * 
      */
     public void updateChargerFromCloud() {
         try {
             String id = getThing().getUID().getId();
+            ThingStatus status = getThing().getStatus();
 
-            logger.debug("Updating channels for charger {}", id);
+            if (!status.equals(ThingStatus.ONLINE) && !status.equals(ThingStatus.OFFLINE)) {
+                return;
+            }
+            
+            logger.debug("Updating channels for charger {}, thing status {}", id, getThing().getStatus());
+ 
+            if (api == null) {
+                logger.error("null api!");
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                        "Null API");
+                return;
+            }
             chargerState = api.getChargerState(id);
             if (chargerState == null) {
                 logger.debug("Failed to update state from API, Charger {} changed to OFFLINE. Will try again later",
@@ -139,7 +154,7 @@ public class easeeChargerHandler extends BaseThingHandler {
                     break;
                 default:
                     updateState(STATE_ID, new StringType("unknown"));
-                    logger.debug("chargerOpMode = {}", chargerState.chargerOpMode);
+                    logger.warn("Unknown chargerOpMode = {}", chargerState.chargerOpMode);
                     break;
             }
             updateState(TOTAL_POWER_ID, new DecimalType(chargerState.totalPower));
@@ -159,7 +174,7 @@ public class easeeChargerHandler extends BaseThingHandler {
                     (chargerState.latestFirmware.equals(chargerState.chargerFirmware)) ? OnOffType.OFF : OnOffType.ON);
 
         } catch (Exception e) {
-            logger.error("Caught exception, message '{}'", e.getMessage());
+            logger.error("Caught exception, '{}'", e.toString());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
         }
     }

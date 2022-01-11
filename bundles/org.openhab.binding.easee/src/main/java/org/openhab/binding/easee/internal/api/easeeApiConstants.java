@@ -26,4 +26,6 @@ public class easeeApiConstants {
     public static final String REFRESH_TOKEN_URL = LOGIN_BASE_URL + "/accounts/refresh_token";
     public static final String GET_CHARGERS_URL = LOGIN_BASE_URL + "/chargers";
     public static final String GET_STATE_URL = LOGIN_BASE_URL + "/state";
+
+    public static final int TOKEN_EXPIRATION_BUFFER = 300; // 5 minute buffer
 }

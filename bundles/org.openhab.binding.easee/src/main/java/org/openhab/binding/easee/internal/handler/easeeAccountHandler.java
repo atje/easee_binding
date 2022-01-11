@@ -64,7 +64,6 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
      */
     private final Logger logger = LoggerFactory.getLogger(easeeAccountHandler.class);
     private final Gson gson = new Gson();
-    private final OAuthFactory oAuthFactory;
     private final HttpClient httpClient;
 
     private @Nullable Future<?> pollFuture;
@@ -76,7 +75,6 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
     public easeeAccountHandler(Bridge bridge, final HttpClient httpClient, final OAuthFactory oAuthFactory) {
         super(bridge);
         this.httpClient = httpClient;
-        this.oAuthFactory = oAuthFactory;
     }
 
     @Override
@@ -89,7 +87,7 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
             easeeAccountConfiguration config = getConfigAs(easeeAccountConfiguration.class);
             pollingIntervall = config.pollingInterval;
 
-            api = new easeeAPI(httpClient, oAuthFactory, getThing().toString(), config.username, config.password);
+            api = new easeeAPI(httpClient, getThing().toString(), config.username, config.password);
 
             updateStatus(ThingStatus.UNKNOWN);
             api.authenticateUser();
@@ -148,7 +146,7 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
         logger.debug("Polling - calling updateChargerChannels on all Charger Things");
         for (Thing thing : getThing().getThings()) {
             ThingHandler handler = thing.getHandler();
-            if (handler != null) {
+            if (handler != null) { 
                 ((easeeChargerHandler) handler).updateChargerFromCloud();
             }
         }

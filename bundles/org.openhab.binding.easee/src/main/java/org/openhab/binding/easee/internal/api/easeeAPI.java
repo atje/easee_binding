@@ -12,7 +12,10 @@
  */
 package org.openhab.binding.easee.internal.api;
 
-import static org.openhab.binding.easee.internal.api.easeeApiConstants.*;
+import static org.openhab.binding.easee.internal.api.easeeApiConstants.GET_CHARGERS_URL;
+import static org.openhab.binding.easee.internal.api.easeeApiConstants.LOGIN_AUTHORIZE_URL;
+import static org.openhab.binding.easee.internal.api.easeeApiConstants.REFRESH_TOKEN_URL;
+import static org.openhab.binding.easee.internal.api.easeeApiConstants.TOKEN_EXPIRATION_BUFFER;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -21,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -33,15 +39,9 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.easee.internal.dto.chargerDTO;
 import org.openhab.binding.easee.internal.dto.chargerStateDTO;
-import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
-import org.openhab.core.auth.client.oauth2.OAuthClientService;
-import org.openhab.core.auth.client.oauth2.OAuthFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * The {@link easeeAPI} handles all Easee Cloud communication, including automatic refresh of authentication
@@ -50,43 +50,34 @@ import com.google.gson.reflect.TypeToken;
  * @author Andreas Tjernsten - Initial contribution
  */
 @NonNullByDefault
-public class easeeAPI implements AccessTokenRefreshListener {
+public class easeeAPI {
     private final Logger logger = LoggerFactory.getLogger(easeeAPI.class);
 
-    private final OAuthFactory oAuthFactory;
     private final HttpClient httpClient;
     private final String uniqueID;
     private final String username;
     private final String password;
     private final Gson gson = new Gson();
 
-    private @Nullable OAuthClientService oAuthService;
+    private @Nullable AccessTokenResponse accessTokenResponse;
 
     /**
      * Create {@link easeeAPI} instance
      * 
      * @param httpClient HttpClient to use for could access
-     * @param oAuthFactory OAuthFactory for creation of OAuthClientService (this is done when {@link authenticateUser}
-     *            is called)
      * @param uniqueID unique ID for this instance
      * @param username Easee cloud username
      * @param password Easee cloud password
      */
-    public easeeAPI(HttpClient httpClient, OAuthFactory oAuthFactory, String uniqueID, String username,
+    public easeeAPI(HttpClient httpClient, String uniqueID, String username,
             String password) {
         this.httpClient = httpClient;
-        this.oAuthFactory = oAuthFactory;
         this.uniqueID = uniqueID;
         this.username = username;
         this.password = password;
     }
 
-    @Override
-    public void onAccessTokenResponse(AccessTokenResponse tokenResponse) {
-        logger.debug("Easee Could Auth Token Refreshed for {}, expires in {}", uniqueID, tokenResponse.getExpiresIn());
-    }
-
-    /**
+     /**
      * {@link authenticateUser} authenticates user towards Easee cloud using credentials provided upon easeeAPI instance
      * creation.
      * Also creates a OAuthClientService for handling authentication token refresh.
@@ -127,14 +118,8 @@ public class easeeAPI implements AccessTokenRefreshListener {
                         "Could not parse token response from server. Set TRACE level to see full response");
             }
 
-            if (oAuthService == null || oAuthService.isClosed()) {
-                logger.debug("Creating oAuthService instance");
-                oAuthService = oAuthFactory.createOAuthClientService(uniqueID, REFRESH_TOKEN_URL, LOGIN_AUTHORIZE_URL,
-                        username, null, null, false);
-            }
-
             accessTokenResponse.setCreatedOn(LocalDateTime.now());
-            oAuthService.importAccessTokenResponse(accessTokenResponse);
+            this.accessTokenResponse = accessTokenResponse;
 
         } catch (Exception e) {
             throw new easeeCommunicationException(e.getMessage());
@@ -230,6 +215,7 @@ public class easeeAPI implements AccessTokenRefreshListener {
      */
     @Nullable
     private ContentResponse getCheckedResponse(Request request) {
+        logger.debug("getCheckedResponse");
         try {
             if (request == null) {
                 logger.error("null request in getCheckedResponse()");
@@ -256,7 +242,8 @@ public class easeeAPI implements AccessTokenRefreshListener {
     }
 
     /**
-     * {@link getAndCheckAccessTokenResponse} gets AccessTokenResponse from oAuthService, or null if there was a problem
+     * {@link getAndCheckAccessTokenResponse} gets stored AccessTokenResponse, or null if there was a problem
+     * The method checks if the accessToken has expired and tries to refresh it if necessary.
      * 
      * @return AccessTokenResponse
      */
@@ -264,33 +251,53 @@ public class easeeAPI implements AccessTokenRefreshListener {
     private AccessTokenResponse getAndCheckAccessTokenResponse() {
         AccessTokenResponse accessTokenResponse = null;
 
+        logger.debug("getAndCheckAccessTokenResponse");
         try {
-            OAuthClientService oAuthService = this.oAuthService;
+            accessTokenResponse = this.accessTokenResponse;
 
-            if (oAuthService == null) {
-                logger.error("No oAuthService for Easee account, null");
-                return null;
+            if ((accessTokenResponse == null)
+                    || 
+                (accessTokenResponse != null
+                    && !accessTokenResponse.isExpired(LocalDateTime.now(), TOKEN_EXPIRATION_BUFFER))) {
+                return accessTokenResponse;
             }
 
-            accessTokenResponse = oAuthService.getAccessTokenResponse();
+           // Assuming that the accessToken is valid but has expired. Refresh needed
+           logger.debug("Refreshing access token for Easee cloud user '{}'", username);
 
-            if (accessTokenResponse == null) {
-                logger.error("Failed to retrieve accessToken from OAuthService for Easee account, null");
-                return null;
+           Request request = httpClient.newRequest(REFRESH_TOKEN_URL).method(HttpMethod.POST)
+                   .header(HttpHeader.ACCEPT, MediaType.APPLICATION_JSON)
+                   .header("Authorization", authTokenHeader(accessTokenResponse))
+                   .header(HttpHeader.CONTENT_TYPE, "application/*+json").content(new StringContentProvider(
+                           "{\"accessToken\":\"" + accessTokenResponse.getAccessToken() + "\",\"refreshToken\":\"" + accessTokenResponse.getRefreshToken() + "\"}", "utf-8"));
+
+           ContentResponse response = getCheckedResponse(request);
+
+
+           AccessTokenResponse newAccessTokenResponse = gson.fromJson(response.getContentAsString(),
+                    AccessTokenResponse.class);
+
+           if (newAccessTokenResponse == null) {
+               logger.trace("Content response: {}", response.getContentAsString());
+               logger.error("Could not parse token response from server. Set TRACE level to see full response");
+               return null;
             }
 
-            return accessTokenResponse;
+            logger.debug("Easee Cloud Auth Token Refreshed for {}, expires in {}", uniqueID,
+                    newAccessTokenResponse.getExpiresIn());
+ 
+            newAccessTokenResponse.setCreatedOn(LocalDateTime.now());
+            this.accessTokenResponse = newAccessTokenResponse;
+
+            return this.accessTokenResponse;
 
         } catch (Exception e) {
-            logger.error("Failed to get accessTokenResponse, exception {}", e.getMessage());
+            logger.error("getAndCheckAccessTokenResponse, exception {}", e.getMessage());
             return null;
         }
     }
 
     public void close() {
-        if (oAuthService != null) {
-            oAuthService.close();
-        }
     }
 
     private String authTokenHeader(AccessTokenResponse tokenResponse) {
