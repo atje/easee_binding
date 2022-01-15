@@ -66,7 +66,7 @@ easee.things:
 ```
 Bridge easee:account:myeasee "Easee cloud account" [ username="<user_name>", password="<password>" ] {
   Things: 
-    charger EH123456 "Car Charger" @ "Garage"
+    charger EH123456 "Car Charger" @ "Garage" [ id="EH123456" ]
 }
 ```
 
