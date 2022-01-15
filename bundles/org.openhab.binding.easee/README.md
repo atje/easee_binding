@@ -1,41 +1,29 @@
 # easee Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
+This binding provides access to [Easee](https://easee.com/) car charging robots through integration with [Easee Cloud](https://developer.easee.cloud/). It currently supports read-only data from Easee charger robots registered to your personal cloud account.   
 
-_If possible, provide some resources like pictures, a video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
+_Note that you need to have a registered Easee Cloud account for access to be possible._
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/OH-INF/thing``` of your binding._
+| Thing Type ID       | Description                                                 |
+| ------------------- | ----------------------------------------------------------- |
+| account             | The Cloud account access, acts as Bridge for charger things |
+| charger             | An Easee car smart charging robot                           |
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
-
-## Binding Configuration
-
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the easee Binding
-#
-# Default secret key for the pairing of the easee Thing.
-# It has to be between 10-40 (alphanumeric) characters.
-# This may be changed by the user for security reasons.
-secret=openHABSecret
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```src/main/resources/OH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+Once an account bridge has been configured and is online, the binding will discover new chargers automatically.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
+Supported configuration parameters for account bridges:
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/OH-INF/thing``` of your binding._
+| Property                        | Type    | Default | Required | Description                                                     |
+|---------------------------------|---------|---------|----------|-----------------------------------------------------------------|
+| username                        | String  |         | Yes      | email or telephone number used for login to Easee Cloud account |
+| password                        | String  |         | Yes      | password used for login to Easee Cloud account                  |
+| pollingInterval                 | Integer | 60      | No       | Polling interval towards Cloud service. Defaults to 60 seconds  |
 
 ## Channels
 
@@ -43,14 +31,64 @@ _Here you should provide information about available channel types, what their m
 
 _Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/OH-INF/thing``` of your binding._
 
-| channel  | type   | description                  |
-|----------|--------|------------------------------|
-| control  | Switch | This is the control channel  |
+The following read only channels are supported for a charger thing 
+
+| Channel              | Type                   | Description                                                                                 |
+|----------------------|------------------------|---------------------------------------------------------------------------------------------|
+| state                | String                 | Charger state, see description below                                                        |
+| totalpower           | Number:Power           | The total power provided to the vehicle (total for all power lines)                         |
+| energyperhour        | Number:Power           | Energy per hour (in kWh) currently provided to the vehicle                                  |
+| sessionenergy        | Number:Power           | Total energy provided for this vehicle during current or last charging session              |
+| lifetimeenergy       | Number:Power           | The total energy provided through the charger (kWh), since charger was first commissioned   |
+| phase1current        | Number:ElectricCurrent | Phase 1 current  (Ampere)                                                                   |
+| phase2current        | Number:ElectricCurrent | Phase 2 current  (Ampere)                                                                   |
+| phase3current        | Number:ElectricCurrent | Phase 3 current  (Ampere)                                                                   |
+| phase1voltage        | Number:ElectricCurrent | Phase 1 voltage  (Volt)                                                                     |
+| phase2voltage        | Number:ElectricCurrent | Phase 2 voltage  (Volt)                                                                     |
+| phase3voltage        | Number:ElectricCurrent | Phase 3 voltage  (Volt)                                                                     |
+| newfirwareavailable  | Switch                 | New firmware for the charger is available if ON, otherwise OFF                              |
+
+
+The state channel contains of the following string values:
+
+| state value | Description                                                       |
+|-------------|-------------------------------------------------------------------|
+| waiting     | Waiting for car to connect to charger                             |
+| connected   | Car connected, charging not started                               |
+| charging    | Car charging ongoing                                              |
+| unknown     | The charger state currently unmapped (reverse-engineering needed) |
+
 
 ## Full Example
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
+easee.things:
 
-## Any custom content here!
+```
+Bridge easee:account:myeasee "Easee cloud account" [ username="<user_name>", password="<password>" ] {
+  Things: 
+    charger EH123456 "Car Charger" @ "Garage"
+}
+```
 
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
+easee.items:
+
+```
+Group gCarCharger "Car charger group"
+
+String chargerStatus            "Charger status"              (gCarCharger) {channel="easee:charger:dcdaca4318:EH123456:state"}
+Switch newFirmwareAvailable     "New charger FW available"    (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:newfirwareavailable"}
+
+Number chargerLifetimeEnergy    "Charger lifetime energy"     (gCarCharger)  {channel="easee:charger:dcdaca4318:EH123456:lifetimeenergy"} 
+Number chargerEnergyPerHour     "Charger energy per hour"     (gCarCharger)  {channel="easee:charger:dcdaca4318:EH123456:energyperhour"}
+Number chargerSessionEnergy     "Session energy"              (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:sessionenergy"}
+Number chargerTotalPower        "Charger total power"         (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:totalpower"}
+
+Number chargerP1Current         "P1 Current"                  (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:phase1current"}
+Number chargerP2Current         "P2 Current"                  (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:phase2current"}
+Number chargerP3Current         "P3 Current"                  (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:phase3current"}
+
+Number chargerP1Voltage         "P1 Voltage"                  (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:phase1voltage"}
+Number chargerP2Voltage         "P2 Voltage"                  (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:phase2voltage"}
+Number chargerP3Voltage         "P3 Voltage"                  (gCarCharger)            {channel="easee:charger:dcdaca4318:EH123456:phase3voltage"}
+```
+
