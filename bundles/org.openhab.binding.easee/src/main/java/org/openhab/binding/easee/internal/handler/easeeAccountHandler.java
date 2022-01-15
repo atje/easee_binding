@@ -12,9 +12,6 @@
  */
 package org.openhab.binding.easee.internal.handler;
 
-import static org.openhab.binding.easee.internal.api.easeeApiConstants.*;
-import static org.openhab.binding.easee.internal.easeeBindingConstants.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,8 +39,6 @@ import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 /**
  * The {@link easeeAccountHandler} implements a bridge towards Easee cloud, representing a registered account.
  * When active, it will trigger updates of all defined charger Things with an intervall defined by the configuration
@@ -54,16 +49,7 @@ import com.google.gson.Gson;
 @NonNullByDefault
 public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandler {
 
-    /*
-     * Easee authentication API endpoints
-     */
-    /*
-     * private static final String LOGIN_BASE_URL = "https://api.easee.cloud/api";
-     * private static final String LOGIN_AUTHORIZE_URL = LOGIN_BASE_URL + "/accounts/login";
-     * private static final String REFRESH_TOKEN_URL = LOGIN_BASE_URL + "/accounts/refresh_token";
-     */
     private final Logger logger = LoggerFactory.getLogger(easeeAccountHandler.class);
-    private final Gson gson = new Gson();
     private final HttpClient httpClient;
 
     private @Nullable Future<?> pollFuture;
@@ -96,6 +82,13 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
             logger.info("Got {} chargers from cloud service (enable TRACE level to see full list)", chargers.size());
             logger.trace("chargers: {}", chargers.toString());
 
+            for (Thing thing : getThing().getThings()) {
+                ThingHandler handler = thing.getHandler();
+                if (handler != null) {
+                    ((easeeChargerHandler) handler).initialize();
+                }
+            }
+            
             startPoll();
 
         } catch (Exception e) {
