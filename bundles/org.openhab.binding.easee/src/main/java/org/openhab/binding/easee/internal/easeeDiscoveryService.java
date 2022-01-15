@@ -12,8 +12,7 @@
  */
 package org.openhab.binding.easee.internal;
 
-import static org.openhab.binding.easee.internal.easeeBindingConstants.SUPPORTED_DISCOVERY_THING_TYPES_UIDS;
-import static org.openhab.binding.easee.internal.easeeBindingConstants.THING_TYPE_CHARGER;
+import static org.openhab.binding.easee.internal.easeeBindingConstants.*;
 
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -43,9 +42,6 @@ import org.slf4j.LoggerFactory;
 @Component(service = DiscoveryService.class, configurationPid = "discovery.easee")
 @NonNullByDefault
 public class easeeDiscoveryService extends AbstractDiscoveryService implements ThingHandlerService {
-    private static final int DISCOVERY_TMO_SECONDS = 5;
-    private static final long DISCOVERY_INTERVAL_MINUTES = 15;
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private @Nullable ScheduledFuture<?> discoveryScheduler;
 
