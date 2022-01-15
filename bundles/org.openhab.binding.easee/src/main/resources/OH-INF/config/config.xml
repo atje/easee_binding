@@ -20,5 +20,9 @@
 		</parameter>
 	</config-description>
 	<config-description uri="thing-type:easee:charger">
+		<parameter name="id" type="text" required="true">
+			<label>Charger ID</label>
+			<description>Enter charger ID, for example EHxxxxx where 'xxxxx' is a number</description>
+		</parameter>
 	</config-description>
 </config-description:config-descriptions>
