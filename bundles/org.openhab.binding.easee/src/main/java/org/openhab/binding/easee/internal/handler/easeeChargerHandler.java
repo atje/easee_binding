@@ -76,6 +76,7 @@ public class easeeChargerHandler extends BaseThingHandler {
         try {
             if (getThing().getStatus().equals(ThingStatus.ONLINE)) {
                 if (command instanceof RefreshType) {
+                    logger.debug("Refresh called for charger {}", getThing().getUID().getId());
                     updateChargerFromCloud();
                     return;
                 }
