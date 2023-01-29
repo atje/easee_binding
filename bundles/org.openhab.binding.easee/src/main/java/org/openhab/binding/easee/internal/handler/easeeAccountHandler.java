@@ -88,7 +88,7 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
                     ((easeeChargerHandler) handler).initialize();
                 }
             }
-            
+
             startPoll();
 
         } catch (Exception e) {
@@ -139,7 +139,7 @@ public class easeeAccountHandler extends BaseBridgeHandler implements ThingHandl
         logger.debug("Polling - calling updateChargerChannels on all Charger Things");
         for (Thing thing : getThing().getThings()) {
             ThingHandler handler = thing.getHandler();
-            if (handler != null) { 
+            if (handler != null) {
                 ((easeeChargerHandler) handler).updateChargerFromCloud();
             }
         }

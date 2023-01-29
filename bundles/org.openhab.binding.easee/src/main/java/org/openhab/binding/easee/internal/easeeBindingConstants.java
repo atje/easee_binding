@@ -29,7 +29,6 @@ public class easeeBindingConstants {
     private static final String BINDING_ID = "easee";
     public static final String VENDOR_EASEE = "Easee";
 
-
     public static final int DISCOVERY_TMO_SECONDS = 5;
     public static final long DISCOVERY_INTERVAL_MINUTES = 15;
 

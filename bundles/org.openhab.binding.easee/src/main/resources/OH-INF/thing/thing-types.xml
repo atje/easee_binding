@@ -7,7 +7,7 @@
 	<bridge-type id="account">
 		<label>Easee Cloud</label>
 		<description>Represents the connection to Easee Cloud</description>
-		<category>Webservice</category>
+		<category>WebService</category>
 		<config-description-ref uri="thing-type:easee:account"/>
 	</bridge-type>
 

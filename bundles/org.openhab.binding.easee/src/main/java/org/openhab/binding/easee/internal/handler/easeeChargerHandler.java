@@ -102,13 +102,12 @@ public class easeeChargerHandler extends BaseThingHandler {
             if (!status.equals(ThingStatus.ONLINE) && !status.equals(ThingStatus.OFFLINE)) {
                 return;
             }
-            
+
             logger.debug("Updating channels for charger {}, thing status {}", id, getThing().getStatus());
- 
+
             if (api == null) {
                 logger.error("null api!");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-                        "Null API");
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Null API");
                 return;
             }
             chargerState = api.getChargerState(id);

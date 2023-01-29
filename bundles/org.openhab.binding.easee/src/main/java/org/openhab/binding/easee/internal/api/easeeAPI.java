@@ -25,9 +25,6 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
@@ -42,6 +39,9 @@ import org.openhab.binding.easee.internal.dto.chargerStateDTO;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * The {@link easeeAPI} handles all Easee Cloud communication, including automatic refresh of authentication
@@ -69,15 +69,14 @@ public class easeeAPI {
      * @param username Easee cloud username
      * @param password Easee cloud password
      */
-    public easeeAPI(HttpClient httpClient, String uniqueID, String username,
-            String password) {
+    public easeeAPI(HttpClient httpClient, String uniqueID, String username, String password) {
         this.httpClient = httpClient;
         this.uniqueID = uniqueID;
         this.username = username;
         this.password = password;
     }
 
-     /**
+    /**
      * {@link authenticateUser} authenticates user towards Easee cloud using credentials provided upon easeeAPI instance
      * creation.
      * Also creates a OAuthClientService for handling authentication token refresh.
@@ -255,37 +254,37 @@ public class easeeAPI {
         try {
             accessTokenResponse = this.accessTokenResponse;
 
-            if ((accessTokenResponse == null)
-                    || 
-                (accessTokenResponse != null
+            if ((accessTokenResponse == null) || (accessTokenResponse != null
                     && !accessTokenResponse.isExpired(LocalDateTime.now(), TOKEN_EXPIRATION_BUFFER))) {
                 return accessTokenResponse;
             }
 
-           // Assuming that the accessToken is valid but has expired. Refresh needed
-           logger.debug("Refreshing access token for Easee cloud user '{}'", username);
+            // Assuming that the accessToken is valid but has expired. Refresh needed
+            logger.debug("Refreshing access token for Easee cloud user '{}'", username);
 
-           Request request = httpClient.newRequest(REFRESH_TOKEN_URL).method(HttpMethod.POST)
-                   .header(HttpHeader.ACCEPT, MediaType.APPLICATION_JSON)
-                   .header("Authorization", authTokenHeader(accessTokenResponse))
-                   .header(HttpHeader.CONTENT_TYPE, "application/*+json").content(new StringContentProvider(
-                           "{\"accessToken\":\"" + accessTokenResponse.getAccessToken() + "\",\"refreshToken\":\"" + accessTokenResponse.getRefreshToken() + "\"}", "utf-8"));
+            Request request = httpClient.newRequest(REFRESH_TOKEN_URL).method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT, MediaType.APPLICATION_JSON)
+                    .header("Authorization", authTokenHeader(accessTokenResponse))
+                    .header(HttpHeader.CONTENT_TYPE, "application/*+json").content(
+                            new StringContentProvider(
+                                    "{\"accessToken\":\"" + accessTokenResponse.getAccessToken()
+                                            + "\",\"refreshToken\":\"" + accessTokenResponse.getRefreshToken() + "\"}",
+                                    "utf-8"));
 
-           ContentResponse response = getCheckedResponse(request);
+            ContentResponse response = getCheckedResponse(request);
 
-
-           AccessTokenResponse newAccessTokenResponse = gson.fromJson(response.getContentAsString(),
+            AccessTokenResponse newAccessTokenResponse = gson.fromJson(response.getContentAsString(),
                     AccessTokenResponse.class);
 
-           if (newAccessTokenResponse == null) {
-               logger.trace("Content response: {}", response.getContentAsString());
-               logger.error("Could not parse token response from server. Set TRACE level to see full response");
-               return null;
+            if (newAccessTokenResponse == null) {
+                logger.trace("Content response: {}", response.getContentAsString());
+                logger.error("Could not parse token response from server. Set TRACE level to see full response");
+                return null;
             }
 
             logger.debug("Easee Cloud Auth Token Refreshed for {}, expires in {}", uniqueID,
                     newAccessTokenResponse.getExpiresIn());
- 
+
             newAccessTokenResponse.setCreatedOn(LocalDateTime.now());
             this.accessTokenResponse = newAccessTokenResponse;
 
